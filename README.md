@@ -1,52 +1,70 @@
 # GitHub actions, AWS Lambda med API Gateway og AWS SAM
 
 * I denne øvingen skal vi se på Github actions og hvordan vi kan sette opp en CD pipeline for en AWS Lambdafunksjon. 
-Vi skal bruke AWS tjenesten "Comprehend" for å finne "stemningen" (Sentiment) i en tekst- og om den er negativt eller positivt 
+Vi skal også bruke AWS tjenesten "Comprehend" for å finne "stemningen" (Sentiment) i en tekst- og om den er negativt eller positivt 
 ladet. 
-
-* Vi skal også se på hvordan vi kan bruke "Feature toggles" med tjenesten Unleash for å slå av/på funkskjonalitet dynamisk 
-uten å gjøre nye deployments. 
-
-* NB! I denne øvingen er det URL til instruktøren sitt miljø i Unleash som er hardkodet inn i filen  ```app.py``` - Unleash sin  
-brukerregistrering er ikke helt synkron, så det kan ta timer(!) fra du registrerer deg til miljøet ditt er klart. I en lab/øving har vi ikke tid til å vente på dette. 
 
 * Deployment og bygg skal gjøres med verktøyet "AWS SAM", både i pipeline med GitHub actions, men også for fra et Cloud9
 miljø.
 
-## Lag en fork
+## Før dere starter
 
-Du må start emd å lage en fork av dette repositoryet til din egen GitHub konto.
+- Dere trenger en GitHub Konto
+- Lag en _fork_ av dette repositoriet inn i din egen GitHub konto
 
 ![Alt text](img/fork.png  "a title")
 
-## Logg i Cloud 9 miljøet ditt 
+### Sjekk ut Cloud 9 miljøet ditt i AWS og bli kjent med det
 
-![Alt text](img/aws_login.png  "a title")
+* URL for innlogging er https://244530008913.signin.aws.amazon.com/console
+* Brukernavnet og passordet er gitt i klasserommet
 
-* Logg på med din AWS bruker med URL, brukernavn og passord gitt i klassrommet
-* Gå til tjenesten Cloud9 (Du nå søke på Cloud9 uten mellomrom i søket) 
-* Velg "Open IDE" 
-* Hvis du ikke ser ditt miljø, kan det hende du har valgt feil region. Hvilken region du skal bruke vil bli oppgitt i klasserommet.
+* Fra hovedmenyen, søk etter tjenesten "cloud9"
 
-## Rydde plass
+![Alt text](img/11.png  "a title")
 
-Det er bare 10GB med data på den virtuelle serveren Cloud9 miljøet er startet på, så du må slette et par docker images for å rydde
-pass 
+* Velg "your environments" fra venstremenyen hvis du ikke ser noen miljøer med ditt navn
+* Hvis du ikke ser noe å trykke på som har ditt navn, pass på at du er i rett region (gitt i klasserommet)
+* Velg "Open IDE"
+
+Du må nå vente litt mens Cloud 9 starter
+
+* Hvis du velger "9" ikonet på øverst til venstre i hovedmenyen vil du se "AWS Explorer". Naviger gjerne litt rundt I AWS Miljøet for å bli kjent.
+* Blir kjent med IDE, naviger rundt.
+
+![Alt text](img/cloud9.png  "a title")
+
+Start en ny terminal i Cloud 9 ved å trykke (+) symbolet på tabbene
+![Alt text](img/newtab.png  "a title")
+
+Kjør denne kommandoen for å verifisere at Java 11 er installert
 
 ```shell
- docker image rm lambci/lambda:nodejs10.x
- docker image rm lambci/lambda:nodejs12.x
- docker image rm lambci/lambda:python2.7
+java -version
+```
+Du skal få
+```
+openjdk 11.0.14.1 2022-02-08 LTS
+OpenJDK Runtime Environment Corretto-11.0.14.10.1 (build 11.0.14.1+10-LTS)
+OpenJDK 64-Bit Server VM Corretto-11.0.14.10.1 (build 11.0.14.1+10-LTS, mixed mode)
 ```
 
-Hvis dere får feil på sam build, kjør 
+### Installer Maven i Cloud 9
 
-```python
-docker images
+Kopier disse kommandoene inn i Cloud9 terminalen. De vil installere Maven.
+```shell
+sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+sudo yum install -y apache-maven
 ```
-og slett alle bortsett fra Python3.8
 
+### Klone din Fork (av dette repoet) inn i ditt Cloud 9 miljø
 
+Fra terminalen i Cloud 9, lag en klone.
+
+```shell
+git clone https://github.com/≤github bruker>/02-lambda-sls-cd-only.git
+```
 
 ### Lag et Access Token for GitHub
 
@@ -59,15 +77,7 @@ Access token må ha "repo" tillatelser, og "workflow" tillatelser.
 
 ![Alt text](img/new_token.png  "a title")
 
-### Lage en klone av din Fork (av dette repoet) inn i ditt Cloud 9 miljø
-
-Fra Terminal i Cloud 9. Klone repository med HTTPS URL. Eksempel ; 
-
-```
-git clone https://github.com/≤github bruker>/02-CD-AWS-lamda-sls
-```
-
-Får du denne feilmeldingen ```bash: /02-CD-AWS-lamda-sls: Permission denied``` - så glemte du å bytte ut <github bruker> med 
+Får du denne feilmeldingen ```bash: /02-lambda-sls-cd-only: Permission denied``` - så glemte du å bytte ut <github bruker> med 
 ditt eget Github brukernavn :-) 
 
 ![Alt text](img/clone.png  "a title")
@@ -75,8 +85,7 @@ ditt eget Github brukernavn :-)
 OBS Når du gjør ```git push``` senere og du skal autentisere deg, skal du bruke GitHub Access token når du blir bedt om passord, 
 så du trenger å ta vare på dette et sted. 
 
-For å slippe å autentisere seg hele tiden kan man få git til å cache nøkler i et valgfritt
-antall sekunder på denne måten;
+For å slippe å autentisere seg hele tiden kan man få git til å cache nøkler i et valgfritt  antall sekunder på denne måten;
 
 ```shell
 git config --global credential.helper "cache --timeout=86400"
@@ -96,7 +105,7 @@ git config --global user.email <email for github bruker>
 I cloud 9, åpne en Terminal
 
 ```shell
-cd 02-CD-AWS-lamda-sls
+cd 02-lambda-sls-cd-only
 cd sentiment-demo/
 sam build --use-container
 ```
@@ -104,15 +113,10 @@ sam build --use-container
 Du kan teste funksjonen uten å deploye den til AWS ved å kjøre kommandoen 
 
 ```shell
-export UnleashToken=<Token gitt i klasserommet>
 sam local invoke -e event.json 
 ```
 
-Så lenge feature flagget MOCK er satt til "true" vil sentiment-analysen alltid returnere et positivt sentiment. 
-AWS Comprehend tjenesten vil bli brukt, når MOCK feature flagget er slått av. 
-
 Event.json filen inneholder en request, nøyaktig slik API Gateway sender den til "handler" metoden/funksjonen. 
-
 Du skal få en respons omtrent som denne 
 ```
 {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": "{\"sentiment \": \"{\\\"Sentiment\\\": \\\"NEGATIVE\\\", \\\"SentimentScore\\\": {\\\"Positive\\\": 0.00023614335805177689, \\\"Negative\\\": 0.9974453449249268, \\\"Neutral\\\": 0.00039782875683158636, \\\"Mixed\\\": 0.0019206495489925146}, \\\"ResponseMetadata\\\": {\\\"RequestId\\\": \\\"c3367a61-ee05-4071-82d3-e3aed344f9af\\\", \\\"HTTPStatusCode\\\": 200, \\\"HTTPHeaders\\\": {\\\"x-amzn-requestid\\\": \\\"c3367a61-ee05-4071-82d3-e3aed344f9af\\\", \\\"content-type\\\": \\\"application/x-amz-json-1.1\\\", \\\"content-length\\\": \\\"168\\\", \\\"date\\\": \\\"Mon, 18 Apr 2022 12:00:06 GMT\\\"}, \\\"RetryAttempts\\\": 0}}\"}"}END RequestId: d37e4849-b175-4fa6-aa4b-0031af6f41a0
