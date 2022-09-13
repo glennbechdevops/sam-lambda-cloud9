@@ -22,15 +22,6 @@
 Start en ny terminal i Cloud 9 ved å trykke (+) symbolet på tabbene
 ![Alt text](img/newtab.png  "a title")
 
-### Installer Maven i Cloud 9
-
-Kopier disse kommandoene inn i Cloud9 terminalen. De vil installere Maven.
-```shell
-sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
-sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
-sudo yum install -y apache-maven
-```
-
 ### Klone din Fork (av dette repoet) inn i ditt Cloud 9 miljø
 
 Fra terminalen i Cloud 9, lag en klone.
