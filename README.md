@@ -14,8 +14,6 @@
 * Brukernavnet og passordet er gitt i klasserommet
 * Fra hovedmenyen, søk etter tjenesten "cloud9"
 
-![Alt text](img/11.png  "a title")
-
 * Velg "your environments" fra venstremenyen hvis du ikke ser noen miljøer med ditt navn
 * Hvis du ikke ser noe å trykke på som har ditt navn, pass på at du er i rett region (gitt i klasserommet)
 * Velg "Open IDE"
