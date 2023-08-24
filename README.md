@@ -70,4 +70,3 @@ effektivt sammen om denne funksjonen.
 ## Ekstraoppgaver
 
 * Modifiser  lambda funksjonen - og gjør en ny sam build, og sam deploy.
-* 
