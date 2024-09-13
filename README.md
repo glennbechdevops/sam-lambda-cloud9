@@ -23,7 +23,7 @@ I cloud 9,åpne en Terminal
 ```shell
 sam init
 ```
-
+* Viktig - for prosjektnavn - velg noe med din student-id, eller noe annet unikt. Det blir problemer om to studenter velger samme navn.
 * Gjør egne valg, men videre i disse instrukskjonene antas det at du velger ```1 - Hello World Example``` og et valgfritt språk
 * Gå inn i den opprettede prosjektmappen ved å bruke cd kommandoen.
 * Bygg prosjektet med: ```sam build --use-container```
